@@ -1,0 +1,33 @@
+<?php
+// reject_article.php
+
+session_start();
+
+// فقط مدیر اجازه دارد
+if (empty($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: index.php");
+    exit();
+}
+
+// چک کردن id مقاله
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header("Location: admin_dashboard.php");
+    exit();
+}
+
+$articleId = (int) $_GET['id'];
+
+include 'db.php';
+
+// وضعیت: رد شده (متنی)
+$status = 'rejected';
+
+$sql = "UPDATE articles SET status = ? WHERE id = ?";
+if ($stmt = $conn->prepare($sql)) {
+    $stmt->bind_param("si", $status, $articleId);
+    $stmt->execute();
+    $stmt->close();
+}
+
+header("Location: admin_dashboard.php");
+exit();
